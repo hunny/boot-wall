@@ -13,6 +13,7 @@
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
     <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
     <java.version>1.8</java.version>
+    <apache-commons.version>3.7</apache-commons.version>
     <jjwt.version>0.9.0</jjwt.version>
     <jsoup.version>1.11.2</jsoup.version>
     <kotlin.compiler.incremental>true</kotlin.compiler.incremental>
@@ -42,11 +43,17 @@
   </properties>
 
   <modules>
+    <module>bootwall-excel</module>
     <module>bootwall-tpl</module>
   </modules>
 
   <dependencyManagement>
     <dependencies>
+      <dependency>
+        <groupId>org.apache.commons</groupId>
+        <artifactId>commons-lang3</artifactId>
+        <version>${apache-commons.version}</version>
+      </dependency>
       <dependency>
         <groupId>com.alibaba</groupId>
         <artifactId>druid</artifactId>
@@ -112,6 +119,11 @@
       <dependency>
         <groupId>org.apache.poi</groupId>
         <artifactId>poi</artifactId>
+        <version>${poi.version}</version>
+      </dependency>
+      <dependency>
+        <groupId>org.apache.poi</groupId>
+        <artifactId>poi-ooxml</artifactId>
         <version>${poi.version}</version>
       </dependency>
       <dependency>
