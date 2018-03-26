@@ -14,6 +14,7 @@
     <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
     <java.version>1.8</java.version>
     <apache-commons.version>3.7</apache-commons.version>
+    <cdp4j.version>2.2.4</cdp4j.version>
     <jjwt.version>0.9.0</jjwt.version>
     <jsoup.version>1.11.2</jsoup.version>
     <kotlin.compiler.incremental>true</kotlin.compiler.incremental>
@@ -45,6 +46,7 @@
   <modules>
     <module>bootwall-excel</module>
     <module>bootwall-tpl</module>
+    <module>bootwall-cdp4j</module>
   </modules>
 
   <dependencyManagement>
@@ -68,6 +70,11 @@
         <groupId>io.jsonwebtoken</groupId>
         <artifactId>jjwt</artifactId>
         <version>${jjwt.version}</version>
+      </dependency>
+      <dependency>
+        <groupId>io.webfolder</groupId>
+        <artifactId>cdp4j</artifactId>
+        <version>${cdp4j.version}</version>
       </dependency>
       <dependency>
         <groupId>org.apache.httpcomponents</groupId>
