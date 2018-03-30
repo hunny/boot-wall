@@ -9,6 +9,7 @@ import org.jsoup.nodes.Element;
 import org.jsoup.select.Elements;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.CommandLineRunner;
+import org.springframework.context.annotation.Profile;
 import org.springframework.stereotype.Component;
 
 import com.example.bootwall.cdp4j.service.FreeSsService;
@@ -18,6 +19,7 @@ import io.webfolder.cdp.session.Session;
 import io.webfolder.cdp.session.SessionFactory;
 
 @Component
+@Profile("freess")
 public class FreeSSRunner implements CommandLineRunner {
 
   public static final String IP_PATTERN = //
