@@ -14,7 +14,7 @@ import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
  * <p>
  * 1. 配置<code>spring.druid.servlet.password</code>密码值。
  * <p>
- * 2. 启用了{@link DruidConfig}。
+ * 2. 启用了{@link DruidDaoConfig}。
  * 
  */
 @Target({

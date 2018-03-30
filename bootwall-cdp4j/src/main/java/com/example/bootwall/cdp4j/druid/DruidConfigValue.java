@@ -18,7 +18,7 @@ import org.springframework.stereotype.Component;
 @ConditionalOnProperty(havingValue = "false", //
     prefix = "spring.druid", //
     name = "disable", //
-    matchIfMissing = false //
+    matchIfMissing = true //
 ) //
 public class DruidConfigValue {
 

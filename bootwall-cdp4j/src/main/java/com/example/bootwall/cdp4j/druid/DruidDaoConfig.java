@@ -12,7 +12,7 @@ import com.alibaba.druid.pool.DruidDataSource;
 
 @Configuration
 @ConditionalOnBean(DruidConfigValue.class)
-public class DruidConfig {
+public class DruidDaoConfig {
 
   @Bean // 声明其为Bean实例
   public DataSource dataSource(DruidConfigValue druidConfigValue) throws SQLException {
