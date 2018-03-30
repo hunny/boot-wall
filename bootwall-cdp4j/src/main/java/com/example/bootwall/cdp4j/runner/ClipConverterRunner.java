@@ -21,6 +21,9 @@ public class ClipConverterRunner implements CommandLineRunner {
   
   @Value("${clip.wait.timeout:30000}")
   private int waitTimeout;
+  
+  @Value("${clip.step.wait:2000}")
+  private int stepWait;
 
   @Override
   public void run(String... args) throws Exception {
@@ -40,17 +43,20 @@ public class ClipConverterRunner implements CommandLineRunner {
         session.click("#submiturl");
       }
       
-      Thread.sleep(2000);
+//      session.wait(stepWait);
+      Thread.sleep(stepWait);
       succeed = session.waitUntil(s -> {
         return s.matches("input[value=\"Start!\"]");
       }, waitTimeout);
       session.click("input[value=\"Start!\"]");
       
-      Thread.sleep(2000);
+//      session.wait(stepWait);
+      Thread.sleep(stepWait);
       succeed = session.waitUntil(s -> {
         return s.matches("#downloadbutton");
       }, waitTimeout);
       session.click("#downloadbutton");
+      Thread.sleep(stepWait);
     } catch (Exception e) {
       e.printStackTrace();
     } finally {
