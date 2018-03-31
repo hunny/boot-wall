@@ -10,7 +10,7 @@ import io.webfolder.cdp.session.Session;
 import io.webfolder.cdp.session.SessionFactory;
 
 @Component
-@Profile("clip")
+@Profile("clip") //spring.profiles.active
 public class ClipConverterRunner implements CommandLineRunner {
 
   @Value("${clip.url}")
@@ -48,6 +48,7 @@ public class ClipConverterRunner implements CommandLineRunner {
       succeed = session.waitUntil(s -> {
         return s.matches("input[value=\"Start!\"]");
       }, waitTimeout);
+      session.click("input[id=\"0\"]");
       session.click("input[value=\"Start!\"]");
       
 //      session.wait(stepWait);

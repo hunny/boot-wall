@@ -15,6 +15,7 @@
     <java.version>1.8</java.version>
     <apache-commons.version>3.7</apache-commons.version>
     <cdp4j.version>2.2.4</cdp4j.version>
+    <isoparser.version>1.9.27</isoparser.version>
     <jjwt.version>0.9.0</jjwt.version>
     <jsoup.version>1.11.2</jsoup.version>
     <kotlin.compiler.incremental>true</kotlin.compiler.incremental>
@@ -50,10 +51,25 @@
     <module>bootwall-excel</module>
     <module>bootwall-tpl</module>
     <module>bootwall-cdp4j</module>
+    <module>bootwall-mp4</module>
   </modules>
 
   <dependencyManagement>
     <dependencies>
+      <dependency>
+        <groupId>org.springframework.boot</groupId>
+        <artifactId>spring-boot-dependencies</artifactId>
+        <version>${spring-boot.version}</version>
+        <type>pom</type>
+        <scope>import</scope>
+      </dependency>
+      <dependency>
+        <groupId>org.springframework.cloud</groupId>
+        <artifactId>spring-cloud-dependencies</artifactId>
+        <version>${spring-cloud.version}</version>
+        <type>pom</type>
+        <scope>import</scope>
+      </dependency>
       <dependency>
         <groupId>org.apache.commons</groupId>
         <artifactId>commons-lang3</artifactId>
@@ -63,6 +79,21 @@
         <groupId>org.jvnet.winp</groupId>
         <artifactId>winp</artifactId>
         <version>${winp.version}</version>
+      </dependency>
+      <dependency>
+        <groupId>org.mp4parser</groupId>
+        <artifactId>muxer</artifactId>
+        <version>${isoparser.version}</version>
+      </dependency>
+      <dependency>
+        <groupId>org.mp4parser</groupId>
+        <artifactId>isoparser</artifactId>
+        <version>${isoparser.version}</version>
+      </dependency>
+      <dependency>
+        <groupId>org.mp4parser</groupId>
+        <artifactId>streaming</artifactId>
+        <version>${isoparser.version}</version>
       </dependency>
       <dependency>
         <groupId>com.alibaba</groupId>
