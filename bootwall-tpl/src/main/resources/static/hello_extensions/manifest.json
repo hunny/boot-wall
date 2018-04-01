@@ -1,0 +1,27 @@
+{
+	"name": "Hello Extensions",
+	"description": "Base Level Extension",
+	"version": "1.0",
+	"browser_action": {
+		"default_popup": "dashboard.html",
+		"default_icon": "icon.png"
+	},
+	"manifest_version": 2,
+	"permissions": [
+		"http://www.google.com/",
+		"http://test.abc.com/",
+		"storage"
+	],
+	"background": {
+		"scripts": [
+			"background.js"
+		],
+		"persistent": false
+	},
+	"content_scripts": [
+    {
+      "matches": ["http://test.abc.com/*"],
+      "js": ["hello.js"]
+    }
+  ]
+}
