@@ -1,6 +1,10 @@
 package com.example.bootwall.cdp4j.service;
 
 import java.net.URLDecoder;
+import java.nio.file.Path;
+import java.nio.file.Paths;
+import java.util.Arrays;
+import java.util.UUID;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -33,7 +37,10 @@ public class ChatReaderService {
 
   public void read() {
     Launcher launcher = new Launcher();
-    try (SessionFactory factory = launcher.launch(); //
+    Path remoteProfileData = Paths.get(System.getProperty("java.io.tmpdir")) //
+        .resolve(UUID.randomUUID().toString());
+    try (SessionFactory factory = launcher.launch( //
+        Arrays.asList("--user-data-dir=" + remoteProfileData.toString())); //
         Session session = factory.create()) {
       session.getCommand().getNetwork().enable();
       session.navigate(url);
@@ -61,7 +68,7 @@ public class ChatReaderService {
   }
 
   public static Pattern URL_PATTERN = Pattern.compile("/cgi-bin/mmwebwx-bin/webwxcheckurl\\?requrl=(.*)");
-  public static Pattern UUID = Pattern.compile("https://www.iesdouyin.com/share/video/(\\d+)/");
+  public static Pattern URL_UUID = Pattern.compile("https://www.iesdouyin.com/share/video/(\\d+)/");
 
   public static Video parse(String href) {
     String url = match(href, URL_PATTERN);
@@ -73,7 +80,7 @@ public class ChatReaderService {
     }
     if (null != url && url.contains("douyin.com/share/video")) {
       url = url.split("\\?")[0];
-      String uuid = match(url, UUID);
+      String uuid = match(url, URL_UUID);
       if (null != uuid) {
         video.setUuid(uuid);
       } else {

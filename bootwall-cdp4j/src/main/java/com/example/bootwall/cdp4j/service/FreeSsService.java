@@ -1,10 +1,14 @@
 package com.example.bootwall.cdp4j.service;
 
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Date;
 import java.util.List;
+import java.util.UUID;
 
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
@@ -89,7 +93,9 @@ public class FreeSsService {
 
   private Session createSession(String url) {
     Launcher launcher = new Launcher();
-    SessionFactory factory = launcher.launch();
+    Path remoteProfileData = Paths.get(System.getProperty("java.io.tmpdir")) //
+        .resolve(UUID.randomUUID().toString());
+    SessionFactory factory = launcher.launch(Arrays.asList("--user-data-dir=" + remoteProfileData.toString()));
     Session session = factory.create();
     session.getCommand().getNetwork().enable();
     session.navigate(url);

@@ -2,12 +2,16 @@ package com.example.bootwall.cdp4j.dao;
 
 import java.sql.Connection;
 import java.sql.PreparedStatement;
+import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.PreparedStatementCreator;
+import org.springframework.jdbc.core.RowMapper;
 import org.springframework.jdbc.core.SingleColumnRowMapper;
 import org.springframework.stereotype.Repository;
 import org.springframework.transaction.annotation.Transactional;
@@ -46,8 +50,8 @@ public class VideoDao {
         .append("update video set downloaded = ?, lastUpdated = now() where uuid = ?") //
         .toString();
     jdbcTemplate.update(update, new Object[] { //
+        downloaded, //
         uuid, //
-        downloaded //
     });
   }
 
@@ -63,6 +67,26 @@ public class VideoDao {
       return null;
     }
     return list.get(0);
+  }
+
+  public List<Map<String, String>> listBy(int limit) {
+    String sql = new StringBuilder() //
+        .append("select uuid, url from video where downloaded is null order by dateCreated desc limit ?") //
+        .toString();
+    List<Map<String, String>> list = jdbcTemplate.query(sql, //
+        new Object[] { //
+            limit, //
+        }, //
+        new RowMapper<Map<String, String>>() {
+          @Override
+          public Map<String, String> mapRow(ResultSet rs, int arg1) throws SQLException {
+            Map<String, String> result = new HashMap<>();
+            result.put("uuid", rs.getString("uuid"));
+            result.put("url", rs.getString("url"));
+            return result;
+          }
+        });
+    return list;
   }
 
 }

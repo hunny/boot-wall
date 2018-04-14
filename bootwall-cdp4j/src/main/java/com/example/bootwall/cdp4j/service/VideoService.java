@@ -3,9 +3,18 @@ package com.example.bootwall.cdp4j.service;
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.InputStream;
+import java.nio.file.Path;
+import java.nio.file.Paths;
+import java.text.SimpleDateFormat;
+import java.util.Arrays;
 import java.util.Date;
+import java.util.List;
+import java.util.Map;
+import java.util.UUID;
+import java.util.concurrent.ExecutionException;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
+import java.util.concurrent.Future;
 
 import org.apache.http.HttpEntity;
 import org.apache.http.client.methods.CloseableHttpResponse;
@@ -16,8 +25,11 @@ import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
 import org.jsoup.nodes.Element;
 import org.jsoup.select.Elements;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
+
+import com.example.bootwall.cdp4j.dao.VideoDao;
 
 import io.webfolder.cdp.Launcher;
 import io.webfolder.cdp.session.Session;
@@ -32,39 +44,61 @@ public class VideoService {
   @Value("${video.url:}")
   private String url;
 
-  private static final ExecutorService fixedThreadPool = Executors.newFixedThreadPool(4);
+  @Autowired
+  private VideoDao videoDao;
 
-  public void run(String[] args) throws Exception {
+  public static final ExecutorService fixedThreadPool = Executors.newFixedThreadPool(1);
+
+  public void run() {
     Launcher launcher = new Launcher();
-
-    try (SessionFactory factory = launcher.launch(); Session session = factory.create()) {
+    Path remoteProfileData = Paths.get(System.getProperty("java.io.tmpdir")) //
+        .resolve(UUID.randomUUID().toString());
+    try (SessionFactory factory = launcher.launch( //
+        Arrays.asList("--user-data-dir=" + remoteProfileData.toString())); //
+        Session session = factory.create()) {
       session.getCommand().getNetwork().enable();
-      session.navigate(args[0]);
+      session.navigate(url);
       session.waitDocumentReady(3 * 60 * 1000);
-      String[] urls = new String[] { //
-          "" };
-      for (String u : urls) {
-        session.evaluate("document.getElementsByTagName('input')[0].focus();");
-        session.evaluate("document.getElementsByTagName('input')[0].value = '';");
-        session.sendKeys(u);
-        session.sendEnter();
-        session.wait(2 * 1000);
-        final String content = session.getContent();
-        fixedThreadPool.execute(new Runnable() {
-          @Override
-          public void run() {
-            try {
-              parse(content);
-            } catch (Exception e) {
-              e.printStackTrace();
-            }
+      while (true) {
+        List<Map<String, String>> list = videoDao.listBy(100);
+        for (Map<String, String> u : list) {
+          session.evaluate("document.getElementsByTagName('input')[0].focus();");
+          session.evaluate("document.getElementsByTagName('input')[0].value = '';");
+          session.sendKeys(u.get("url"));
+          session.sendEnter();
+          session.wait(3 * 1000);
+          final String content = session.getContent();
+          try {
+            parse(content, u.get("uuid"));
+            videoDao.update(u.get("uuid"), "OK");
+          } catch (Exception e) {
+            videoDao.update(u.get("uuid"), "ERROR");
+            e.printStackTrace();
           }
-        });
+        }
       }
     }
   }
 
-  private static void parse(String content) throws Exception {
+  protected void asyn(String content, final String uuid) throws Exception {
+    Future<?> future = fixedThreadPool.submit(new Runnable() {
+      @Override
+      public void run() {
+        try {
+          parse(content, uuid);
+        } catch (Exception e) {
+          e.printStackTrace();
+        }
+      }
+    });
+    try {
+      future.get();
+    } catch (Exception e) {
+      throw new Exception("超时。");
+    }
+  }
+
+  private void parse(String content, String uuid) throws Exception {
     CloseableHttpClient httpclient = HttpClients.createDefault();
     Document doc = Jsoup.parse(content);
     Elements elems = doc.select("a");
@@ -76,10 +110,17 @@ public class VideoService {
         CloseableHttpResponse response = httpclient.execute(request);
         HttpEntity entity = response.getEntity();
         int responseCode = response.getStatusLine().getStatusCode();
+        if (responseCode != 200) {
+          throw new Exception("服务器响应代码：" + responseCode);
+        }
         System.out.println("Request Url: " + request.getURI());
         System.out.println("Response Code: " + responseCode);
         InputStream is = entity.getContent();
-        String filePath = "/Users/hunnyhu/Downloads/download/" + new Date().getTime() + ".mp4";
+        String path = "/Users/hunnyhu/Downloads/download/" + new SimpleDateFormat("yyyyMMdd").format(new Date()) + "/";
+        if (!new File(path).exists()) {
+          new File(path).mkdirs();
+        }
+        String filePath = path + new Date().getTime() + ".mp4";
         FileOutputStream fos = new FileOutputStream(new File(filePath));
         int inByte;
         while ((inByte = is.read()) != -1) {
