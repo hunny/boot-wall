@@ -94,7 +94,7 @@ public class FreeSsService {
   private Session createSession(String url) {
     Launcher launcher = new Launcher();
     Path remoteProfileData = Paths.get(System.getProperty("java.io.tmpdir")) //
-        .resolve(UUID.randomUUID().toString());
+        .resolve("freess-html");
     SessionFactory factory = launcher.launch(Arrays.asList("--user-data-dir=" + remoteProfileData.toString()));
     Session session = factory.create();
     session.getCommand().getNetwork().enable();

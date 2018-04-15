@@ -10,8 +10,6 @@ import java.util.Arrays;
 import java.util.Date;
 import java.util.List;
 import java.util.Map;
-import java.util.UUID;
-import java.util.concurrent.ExecutionException;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
@@ -25,6 +23,8 @@ import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
 import org.jsoup.nodes.Element;
 import org.jsoup.select.Elements;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
@@ -38,6 +38,8 @@ import io.webfolder.cdp.session.SessionFactory;
 @Service
 public class VideoService {
 
+  private final Logger logger = LoggerFactory.getLogger(VideoService.class);
+  
   @Value("${video.wait.timeout:180000}")
   private int waitTimeout;
 
@@ -50,9 +52,14 @@ public class VideoService {
   public static final ExecutorService fixedThreadPool = Executors.newFixedThreadPool(1);
 
   public void run() {
+    try {
+      Thread.sleep(2000);
+    } catch (InterruptedException e1) {
+      e1.printStackTrace();
+    }
     Launcher launcher = new Launcher();
     Path remoteProfileData = Paths.get(System.getProperty("java.io.tmpdir")) //
-        .resolve(UUID.randomUUID().toString());
+        .resolve("video-downloaded");
     try (SessionFactory factory = launcher.launch( //
         Arrays.asList("--user-data-dir=" + remoteProfileData.toString())); //
         Session session = factory.create()) {
@@ -104,8 +111,9 @@ public class VideoService {
     Elements elems = doc.select("a");
     for (Element elem : elems) {
       if ("下载视频".equals(elem.text())) {
-        System.out.println(elem.attr("href") + elem.text());
-        HttpGet request = new HttpGet(elem.attr("href"));
+        String link = elem.attr("href");
+        logger.info("准备下载{}", link);
+        HttpGet request = new HttpGet(link);
         request.setHeader("Accept-Type", "application/octet-stream");
         CloseableHttpResponse response = httpclient.execute(request);
         HttpEntity entity = response.getEntity();
@@ -113,14 +121,12 @@ public class VideoService {
         if (responseCode != 200) {
           throw new Exception("服务器响应代码：" + responseCode);
         }
-        System.out.println("Request Url: " + request.getURI());
-        System.out.println("Response Code: " + responseCode);
         InputStream is = entity.getContent();
         String path = "/Users/hunnyhu/Downloads/download/" + new SimpleDateFormat("yyyyMMdd").format(new Date()) + "/";
         if (!new File(path).exists()) {
           new File(path).mkdirs();
         }
-        String filePath = path + new Date().getTime() + ".mp4";
+        String filePath = path + uuid + ".mp4";
         FileOutputStream fos = new FileOutputStream(new File(filePath));
         int inByte;
         while ((inByte = is.read()) != -1) {
@@ -128,6 +134,7 @@ public class VideoService {
         }
         is.close();
         fos.close();
+        logger.info("下载完毕{}", filePath);
       }
     }
   }

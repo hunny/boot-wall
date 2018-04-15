@@ -4,7 +4,6 @@ import java.net.URLDecoder;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.Arrays;
-import java.util.UUID;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -29,7 +28,7 @@ import io.webfolder.cdp.session.SessionFactory;
 public class ChatReaderService {
 
   private Logger logger = LoggerFactory.getLogger(ChatReaderService.class);
-  
+
   private String url = "https://wx2.qq.com/";
 
   @Autowired
@@ -38,7 +37,7 @@ public class ChatReaderService {
   public void read() {
     Launcher launcher = new Launcher();
     Path remoteProfileData = Paths.get(System.getProperty("java.io.tmpdir")) //
-        .resolve(UUID.randomUUID().toString());
+        .resolve("wx2-qq");
     try (SessionFactory factory = launcher.launch( //
         Arrays.asList("--user-data-dir=" + remoteProfileData.toString())); //
         Session session = factory.create()) {
@@ -46,7 +45,6 @@ public class ChatReaderService {
       session.navigate(url);
       session.waitDocumentReady(30 * 1000);
       while (true) {
-        logger.info("准备获取内容。");
         Document doc = Jsoup.parse(session.getContent());
         Elements elems = doc.select("div.bubble_cont");
         for (Element elem : elems) {
@@ -55,9 +53,9 @@ public class ChatReaderService {
             continue;
           }
           Video video = parse(href.attr("href"));
-          logger.info("准备内容{}。", video);
           if (null != video) {
             if (StringUtils.isBlank(videoDao.getBy(video.getUuid()))) {
+              logger.info("新增内容{}。", video);
               videoDao.insert(video);
             }
           }
@@ -102,8 +100,8 @@ public class ChatReaderService {
     return null;
   }
 
-//  public static void main(String[] args) {
-//    parse(null);
-//  }
+  // public static void main(String[] args) {
+  // parse(null);
+  // }
 
 }
