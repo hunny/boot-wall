@@ -6,6 +6,7 @@ public class Video {
   private String url;
   private String downloaded;
   private String type;
+  private String source;
 
   public String getUuid() {
     return uuid;
@@ -37,6 +38,14 @@ public class Video {
 
   public void setType(String type) {
     this.type = type;
+  }
+
+  public String getSource() {
+    return source;
+  }
+
+  public void setSource(String source) {
+    this.source = source;
   }
 
   @Override

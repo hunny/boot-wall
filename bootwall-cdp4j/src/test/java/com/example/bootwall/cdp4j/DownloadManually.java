@@ -33,7 +33,7 @@ public class DownloadManually {
       session.navigate(args[0]);
       session.waitDocumentReady(3 * 60 * 1000);
       String[] urls = new String[] { //
-          "" };
+           };
       for (String u : urls) {
         session.evaluate("document.getElementsByTagName('input')[0].focus();");
         session.evaluate("document.getElementsByTagName('input')[0].value = '';");

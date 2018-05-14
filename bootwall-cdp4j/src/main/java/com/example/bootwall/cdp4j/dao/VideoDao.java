@@ -26,9 +26,9 @@ public class VideoDao {
   public void insert(final Video video) {
     final String insert = new StringBuilder() //
         .append("insert into video (") //
-        .append("uuid, url, downloaded, type, dateCreated, lastUpdated") //
+        .append("uuid, url, downloaded, type, source, dateCreated, lastUpdated") //
         .append(") values (") //
-        .append("?, ?, ?, ?, now(), now()") //
+        .append("?, ?, ?, ?, ?, now(), now()") //
         .append(") ") //
         .toString();
     jdbcTemplate.update(new PreparedStatementCreator() {
@@ -39,6 +39,7 @@ public class VideoDao {
         stmt.setString(2, video.getUrl());
         stmt.setString(3, video.getDownloaded());
         stmt.setString(4, video.getType());
+        stmt.setString(5, video.getSource());
         return stmt;
       }
     });
@@ -51,6 +52,18 @@ public class VideoDao {
         .toString();
     jdbcTemplate.update(update, new Object[] { //
         downloaded, //
+        uuid, //
+    });
+  }
+  
+  @Transactional
+  public void update(String uuid, String downloaded, String text) {
+    final String update = new StringBuilder() //
+        .append("update video set downloaded = ?, text = ?, lastUpdated = now() where uuid = ?") //
+        .toString();
+    jdbcTemplate.update(update, new Object[] { //
+        downloaded, //
+        text, //
         uuid, //
     });
   }
@@ -71,7 +84,27 @@ public class VideoDao {
 
   public List<Map<String, String>> listBy(int limit) {
     String sql = new StringBuilder() //
-        .append("select uuid, url from video where downloaded is null order by dateCreated desc limit ?") //
+        .append("select uuid, source as url from video where downloaded is null order by dateCreated desc limit ?") //
+        .toString();
+    List<Map<String, String>> list = jdbcTemplate.query(sql, //
+        new Object[] { //
+            limit, //
+        }, //
+        new RowMapper<Map<String, String>>() {
+          @Override
+          public Map<String, String> mapRow(ResultSet rs, int arg1) throws SQLException {
+            Map<String, String> result = new HashMap<>();
+            result.put("uuid", rs.getString("uuid"));
+            result.put("url", rs.getString("url"));
+            return result;
+          }
+        });
+    return list;
+  }
+  
+  public List<Map<String, String>> listErrorBy(int limit) {
+    String sql = new StringBuilder() //
+        .append("select uuid, source as url from video where downloaded = 'ERROR' order by dateCreated desc limit ?") //
         .toString();
     List<Map<String, String>> list = jdbcTemplate.query(sql, //
         new Object[] { //

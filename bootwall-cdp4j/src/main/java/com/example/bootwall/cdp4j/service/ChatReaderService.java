@@ -66,7 +66,7 @@ public class ChatReaderService {
   }
 
   public static Pattern URL_PATTERN = Pattern.compile("/cgi-bin/mmwebwx-bin/webwxcheckurl\\?requrl=(.*)");
-  public static Pattern URL_UUID = Pattern.compile("https://www.iesdouyin.com/share/video/(\\d+)/");
+  public static Pattern URL_UUID = Pattern.compile("https://www.iesdouyin.com/share/video/(\\d+)/.*");
 
   public static Video parse(String href) {
     String url = match(href, URL_PATTERN);
@@ -77,6 +77,7 @@ public class ChatReaderService {
       e.printStackTrace();
     }
     if (null != url && url.contains("douyin.com/share/video")) {
+      video.setSource(url);
       url = url.split("\\?")[0];
       String uuid = match(url, URL_UUID);
       if (null != uuid) {

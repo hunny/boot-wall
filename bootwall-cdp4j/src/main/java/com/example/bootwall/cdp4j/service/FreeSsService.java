@@ -8,7 +8,6 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Date;
 import java.util.List;
-import java.util.UUID;
 
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
@@ -60,6 +59,11 @@ public class FreeSsService {
       System.err.println("===========================>");
       Thread.sleep(2000);
       parse(session);
+    }
+    try {
+//      session.close();
+    } catch (Exception e) {
+      e.printStackTrace();
     }
   }
 
