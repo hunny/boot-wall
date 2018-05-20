@@ -67,6 +67,17 @@ public class VideoDao {
         uuid, //
     });
   }
+  
+  @Transactional
+  public void updateText(String uuid, String text) {
+    final String update = new StringBuilder() //
+        .append("update video set text = ?, lastUpdated = now() where uuid = ?") //
+        .toString();
+    jdbcTemplate.update(update, new Object[] { //
+        text, //
+        uuid, //
+    });
+  }
 
   public String getBy(String uuid) {
     String sql = new StringBuilder() //
@@ -105,6 +116,26 @@ public class VideoDao {
   public List<Map<String, String>> listErrorBy(int limit) {
     String sql = new StringBuilder() //
         .append("select uuid, source as url from video where downloaded = 'ERROR' order by dateCreated desc limit ?") //
+        .toString();
+    List<Map<String, String>> list = jdbcTemplate.query(sql, //
+        new Object[] { //
+            limit, //
+        }, //
+        new RowMapper<Map<String, String>>() {
+          @Override
+          public Map<String, String> mapRow(ResultSet rs, int arg1) throws SQLException {
+            Map<String, String> result = new HashMap<>();
+            result.put("uuid", rs.getString("uuid"));
+            result.put("url", rs.getString("url"));
+            return result;
+          }
+        });
+    return list;
+  }
+  
+  public List<Map<String, String>> listTextBy(int limit) {
+    String sql = new StringBuilder() //
+        .append("select uuid, source as url from video where downloaded = 'OK' and text is null order by dateCreated desc limit ?") //
         .toString();
     List<Map<String, String>> list = jdbcTemplate.query(sql, //
         new Object[] { //

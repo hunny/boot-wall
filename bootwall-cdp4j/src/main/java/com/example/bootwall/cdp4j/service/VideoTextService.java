@@ -5,12 +5,12 @@ import java.nio.file.Paths;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
+import java.util.Random;
 
 import org.apache.commons.lang3.StringUtils;
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
 import org.jsoup.nodes.Element;
-import org.jsoup.select.Elements;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -24,8 +24,9 @@ import io.webfolder.cdp.session.Session;
 import io.webfolder.cdp.session.SessionFactory;
 
 @Service
-public class ErrorVideoService {
-  private final Logger logger = LoggerFactory.getLogger(ErrorVideoService.class);
+public class VideoTextService {
+
+  private final Logger logger = LoggerFactory.getLogger(VideoTextService.class);
 
   @Value("${video.wait.timeout:180000}")
   private int waitTimeout;
@@ -40,13 +41,13 @@ public class ErrorVideoService {
     }
     Launcher launcher = new Launcher();
     Path remoteProfileData = Paths.get(System.getProperty("java.io.tmpdir")) //
-        .resolve("video-error-downloaded");
+        .resolve("video-text-downloaded");
     try (SessionFactory factory = launcher.launch( //
         Arrays.asList("--user-data-dir=" + remoteProfileData.toString())); //
         Session session = factory.create()) {
       session.getCommand().getNetwork().enable();
       while (true) {
-        List<Map<String, String>> list = videoDao.listErrorBy(10);
+        List<Map<String, String>> list = videoDao.listTextBy(100);
         if (null == list || list.isEmpty()) {
           session.close();
           return;
@@ -56,35 +57,31 @@ public class ErrorVideoService {
           String url = u.get("url");
           session.navigate(url);
           session.waitDocumentReady(waitTimeout);
-          session.wait(1000);
-          session.evaluate("document.getElementsByClassName('play-btn')[0].click();");
-          session.wait(3000);
-          Document doc = Jsoup.parse(session.getContent());
+          session.wait(new Random().nextInt(5000));
+          String content = (session.getContent());
+          if (null == content) {
+            continue;
+          }
+          Document doc = Jsoup.parse(content);
           Element text = doc.select(".video-info").first();
-          Elements elems = doc.select("video");
-          if (elems.size() == 0 && null != text) {
+          if (null != text) {
             String txt = text.text();
             txt = StringUtils.trim(txt);
-            if (txt.equals("@")) {
-              videoDao.update(uuid, "DELETE", null);
-              continue;
+            if (txt.length() > 1024) {
+              txt = txt.substring(0, 1024);
             }
-          }
-          for (Element elem : elems) {
-            String link = elem.attr("src");
-            String info = null;
-            if (null != text) {
-              info = text.text();
+            if (null != txt) {
+              txt = txt.replaceAll("[^\\u0000-\\uFFFF]", "\uFFFD");
             }
-            if (null != info) {
-              info = info.replaceAll("[^\\u0000-\\uFFFF]", "\uFFFD");
-            }
-            logger.info("准备从官方下载{}", link);
-            try {
-              Downloads.download(uuid, link, "/Users/hunnyhu/Downloads/download/");
-              videoDao.update(uuid, "OK_D", info);
-            } catch (Exception e) {
-              e.printStackTrace();
+            logger.info("更新文本信息[{}]：[{}]", uuid, txt);
+            videoDao.updateText(uuid, txt);
+          } else {
+            Element iframe = doc.select("iframe").first();
+            if (null != iframe //
+                && "https://www.douyin.com/".equals(iframe.attr("src"))) {
+              logger.info("地址已经被封，请更换代理。");
+              session.close();
+              return;
             }
           }
         }
@@ -92,5 +89,4 @@ public class ErrorVideoService {
     }
 
   }
-
 }
