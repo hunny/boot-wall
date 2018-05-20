@@ -33,7 +33,7 @@ public class VideoTextService {
   @Autowired
   private VideoDao videoDao;
 
-  public void run() throws Exception {
+  public void run(final String table) throws Exception {
     try {
       Thread.sleep(3000);
     } catch (InterruptedException e1) {
@@ -47,7 +47,7 @@ public class VideoTextService {
         Session session = factory.create()) {
       session.getCommand().getNetwork().enable();
       while (true) {
-        List<Map<String, String>> list = videoDao.listTextBy(100);
+        List<Map<String, String>> list = videoDao.listTextBy(table, 100);
         if (null == list || list.isEmpty()) {
           session.close();
           return;
@@ -74,7 +74,7 @@ public class VideoTextService {
               txt = txt.replaceAll("[^\\u0000-\\uFFFF]", "\uFFFD");
             }
             logger.info("更新文本信息[{}]：[{}]", uuid, txt);
-            videoDao.updateText(uuid, txt);
+            videoDao.updateText(table, uuid, txt);
           } else {
             Element iframe = doc.select("iframe").first();
             if (null != iframe //

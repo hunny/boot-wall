@@ -23,7 +23,7 @@ public class VideoTextQuartz {
   @Scheduled(fixedRate = 10 * 60 * 1000)
   public void cron() throws Exception {
     logger.info("查询没有文本的视频列表。");
-    videoTextService.run();
+    videoTextService.run("video");
   }
 
 }

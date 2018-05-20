@@ -55,7 +55,7 @@ public class VideoDao {
         uuid, //
     });
   }
-  
+
   @Transactional
   public void update(String uuid, String downloaded, String text) {
     final String update = new StringBuilder() //
@@ -67,11 +67,11 @@ public class VideoDao {
         uuid, //
     });
   }
-  
+
   @Transactional
-  public void updateText(String uuid, String text) {
+  public void updateText(String table, String uuid, String text) {
     final String update = new StringBuilder() //
-        .append("update video set text = ?, lastUpdated = now() where uuid = ?") //
+        .append("update " + table + " set text = ?, lastUpdated = now() where uuid = ?") //
         .toString();
     jdbcTemplate.update(update, new Object[] { //
         text, //
@@ -112,7 +112,7 @@ public class VideoDao {
         });
     return list;
   }
-  
+
   public List<Map<String, String>> listErrorBy(int limit) {
     String sql = new StringBuilder() //
         .append("select uuid, source as url from video where downloaded = 'ERROR' order by dateCreated desc limit ?") //
@@ -132,10 +132,11 @@ public class VideoDao {
         });
     return list;
   }
-  
-  public List<Map<String, String>> listTextBy(int limit) {
+
+  public List<Map<String, String>> listTextBy(String table, int limit) {
     String sql = new StringBuilder() //
-        .append("select uuid, source as url from video where downloaded = 'OK' and text is null order by dateCreated desc limit ?") //
+        .append("select uuid, source as url from " //
+            + table + " where downloaded = 'OK' and text is null order by dateCreated desc limit ?") //
         .toString();
     List<Map<String, String>> list = jdbcTemplate.query(sql, //
         new Object[] { //
