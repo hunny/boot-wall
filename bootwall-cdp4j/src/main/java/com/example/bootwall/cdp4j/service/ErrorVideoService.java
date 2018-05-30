@@ -34,7 +34,7 @@ public class ErrorVideoService {
 
   public void run() throws Exception {
     try {
-      Thread.sleep(3000);
+      Thread.sleep(40000);
     } catch (InterruptedException e1) {
       e1.printStackTrace();
     }

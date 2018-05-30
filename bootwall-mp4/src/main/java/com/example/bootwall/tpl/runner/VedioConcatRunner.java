@@ -5,10 +5,10 @@ import java.io.RandomAccessFile;
 import java.nio.channels.FileChannel;
 import java.text.MessageFormat;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.LinkedList;
 import java.util.List;
 
-import org.assertj.core.util.Arrays;
 import org.mp4parser.Container;
 import org.mp4parser.muxer.Movie;
 import org.mp4parser.muxer.Track;
@@ -25,11 +25,16 @@ import lombok.extern.log4j.Log4j;
 @Component
 public class VedioConcatRunner implements CommandLineRunner {
 
-  @Value("${mp4.targetPath}")
+  @Value("${mp4.targetPath:/Users/hunnyhu/Desktop/tmp.mp4}")
   private String targetPath;
   
   @Override
   public void run(String... args) throws Exception {
+    args = new String[] {
+        "/Users/hunnyhu/Desktop/6559847723787357453.mp4",
+//        "/Users/hunnyhu/Desktop/6559847723787357453.mp4",
+    };
+    targetPath = "/Users/hunnyhu/Desktop/abc.mp4";
     log.debug(MessageFormat.format("视频集：{0}", Arrays.asList(args)));
     log.debug(MessageFormat.format("目标地址：{0}", targetPath));
     videoMerge(args, targetPath);
@@ -59,7 +64,7 @@ public class VedioConcatRunner implements CommandLineRunner {
     Movie result = new Movie();
 
     if (audioTracks.size() > 0) {
-      result.addTrack(new AppendTrack(audioTracks.toArray(new Track[audioTracks.size()])));
+//      result.addTrack(new AppendTrack(audioTracks.toArray(new Track[audioTracks.size()])));
     }
     if (videoTracks.size() > 0) {
       result.addTrack(new AppendTrack(videoTracks.toArray(new Track[videoTracks.size()])));

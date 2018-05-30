@@ -35,7 +35,7 @@ public class VideoTextService {
 
   public void run(final String table) throws Exception {
     try {
-      Thread.sleep(3000);
+      Thread.sleep(30000);
     } catch (InterruptedException e1) {
       e1.printStackTrace();
     }
