@@ -5,9 +5,7 @@ import java.io.FileOutputStream;
 import java.io.InputStream;
 import java.net.URL;
 import java.sql.Connection;
-import java.sql.DriverManager;
 import java.sql.ResultSet;
-import java.sql.SQLException;
 import java.sql.Statement;
 import java.text.SimpleDateFormat;
 import java.util.Date;
@@ -25,14 +23,11 @@ import org.jsoup.select.Elements;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.example.bootwall.cdp4j.dao.DBUtils;
+
 public class VideosService {
 
   private static final Logger LOGGER = LoggerFactory.getLogger(VideosService.class);
-
-  static final String JDBC_DRIVER = "com.mysql.jdbc.Driver";
-  static final String DB_URL = "jdbc:mysql://localhost:3306/ease";
-  static final String USER = "ease";
-  static final String PASS = "ease";
 
   public static void video() throws Exception {
     Document doc = Jsoup.parse(new URL("https://kolranking.com/douyin/videos"), 5000);
@@ -61,36 +56,18 @@ public class VideosService {
   }
 
   public static void userCategory() throws Exception {
-    Class.forName(JDBC_DRIVER);
-    System.out.println("Connecting to database...");
-    Connection conn = DriverManager.getConnection(DB_URL, USER, PASS);
-    // STEP 4: Execute a query
-    System.out.println("Creating statement...");
-    Statement stmt = conn.createStatement();
-
-    for (int i = 1; i < 34; i++) {
-      try {
-        findCategory(stmt, "" + i);
-      } catch (Exception e) {
-        e.printStackTrace();
+    DBUtils.db((Connection conn, Statement stmt) -> {
+      for (int i = 1; i < 34; i++) {
+        try {
+          findCategory(stmt, "" + i);
+        } catch (Exception e) {
+          e.printStackTrace();
+        }
       }
-    }
-
-    try {
-      if (stmt != null) {
-        stmt.close();
-      }
-    } catch (SQLException se2) {
-    } // nothing we can do
-    try {
-      conn.close();
-    } catch (SQLException se) {
-      se.printStackTrace();
-    } // end finally try
+    });
   }
 
-  private static void findCategory(Statement stmt, String index)
-      throws Exception {
+  private static void findCategory(Statement stmt, String index) throws Exception {
     String l = "https://kolranking.com/douyin/users/category/" + index;
     LOGGER.info("Request URL:{}", l);
     Document doc = Jsoup.parse(new URL(l), 10000);
@@ -122,7 +99,8 @@ public class VideosService {
               .append("'") //
               .append(StringUtils.join(new String[] { //
                   url.replaceAll("'", "''"), //
-                  nickname.replaceAll("'", "''").replaceAll("[^\\u0000-\\uD7FF\\uE000-\\uFFFF]", "?"), //
+                  nickname.replaceAll("'", "''").replaceAll("[^\\u0000-\\uD7FF\\uE000-\\uFFFF]",
+                      "?"), //
                   sex.replaceAll("'", "''"), //
                   fans.replaceAll("'", "''"), //
                   likes.replaceAll("'", "''"), //
@@ -135,10 +113,7 @@ public class VideosService {
               .toString()); //
         }
         // STEP 6: Clean-up environment
-        try {
-          rs.close();
-        } catch (Exception e) {
-        }
+        DBUtils.close(rs);
       }
     }
   }
@@ -176,6 +151,7 @@ public class VideosService {
 
   public static void main(String[] args) throws Exception {
     VideosService.userCategory();
+    VideosService.video();
   }
 
 }
